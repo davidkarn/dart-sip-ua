@@ -1076,6 +1076,13 @@ class RTCSession extends EventManager {
       });
     } else {
       _sendReinvite(<String, dynamic>{
+        'rtcOfferConstraints':  <String, dynamic>{
+          'mandatory': <String, dynamic>{
+            'OfferToReceiveAudio': true,
+            'OfferToReceiveVideo': true,
+          },
+          'optional': <dynamic>[],
+        },
         'eventHandlers': handlers,
         'extraHeaders': options['extraHeaders']
       });
@@ -1117,7 +1124,6 @@ class RTCSession extends EventManager {
         'reason_phrase': 'Unhold Failed'
       });
     });
-
     if (options['useUpdate'] != null) {
       _sendUpdate(<String, dynamic>{
         'sdpOffer': true,
