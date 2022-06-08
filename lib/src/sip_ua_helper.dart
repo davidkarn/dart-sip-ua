@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
+import 'constants.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/subscriber_events.dart';
 import 'logger.dart';
@@ -121,6 +122,7 @@ class SIPUAHelper extends EventManager {
     _settings!.dtmf_mode = uaSettings.dtmfMode;
     _settings!.session_timers = uaSettings.sessionTimers;
     _settings!.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
+    _settings!.session_timers_refresh_method = SipMethod.INVITE;
 
     try {
       _ua = UA(_settings);

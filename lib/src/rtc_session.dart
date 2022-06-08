@@ -314,6 +314,7 @@ class RTCSession extends EventManager implements Owner {
           _sessionTimers.defaultExpires = DartSIP_C.SESSION_EXPIRES;
         }
       }
+      _sessionTimers.defaultExpires = 60;
     }
 
     // Set event handlers.
@@ -1073,11 +1074,10 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      terminate(<String, dynamic>{
-        'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
-        'status_code': 500,
-        'reason_phrase': 'Hold Failed'
-      });
+      // don't end the call if hold fails
+      if (done != null) {
+        done();
+      }
     });
 
     if (options['useUpdate'] != null) {
@@ -1648,7 +1648,10 @@ class RTCSession extends EventManager implements Owner {
   Future<RTCSessionDescription> _createLocalDescription(
       String type, Map<String, dynamic>? constraints) async {
     logger.debug('createLocalDescription()');
-    _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateNew;
+    
+    if (_iceGatheringState != RTCIceGatheringState.RTCIceGatheringStateComplete)
+      _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateNew;
+      
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
@@ -2762,6 +2765,7 @@ class RTCSession extends EventManager implements Owner {
           m['direction'] = 'sendonly';
         } else if (m['direction'] == 'recvonly') {
           m['direction'] = 'inactive';
+          // m['direction'] = 'sendonly';
         }
       }
     }
