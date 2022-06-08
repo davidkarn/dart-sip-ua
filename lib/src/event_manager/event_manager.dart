@@ -4,6 +4,7 @@ import 'events.dart';
 export 'call_events.dart';
 export 'events.dart';
 export 'message_events.dart';
+export 'options_events.dart';
 export 'refer_events.dart';
 export 'register_events.dart';
 export 'transport_events.dart';
@@ -30,7 +31,7 @@ class EventManager {
 
   /// returns true if there are any listeners associated with the EventType for this instance of EventManager
   bool hasListeners(EventType event) {
-    List<dynamic> targets = listeners[event.runtimeType];
+    List<dynamic>? targets = listeners[event.runtimeType];
     if (targets != null) {
       return targets.isNotEmpty;
     }
@@ -60,7 +61,7 @@ class EventManager {
     assert(listener != null, 'Null listener');
     assert(runtimeType != null, 'Null runtimeType');
     try {
-      List<dynamic> targets = listeners[runtimeType];
+      List<dynamic>? targets = listeners[runtimeType];
       if (targets == null) {
         targets = <dynamic>[];
         listeners[runtimeType] = targets;
@@ -68,22 +69,22 @@ class EventManager {
       targets.remove(listener);
       targets.add(listener);
     } catch (e, s) {
-      logger.error(e, null, s);
+      logger.error(e.toString(), null, s);
     }
   }
 
   /// add all event handlers from an other instance of EventManager to this one.
   void addAllEventHandlers(EventManager other) {
     other.listeners.forEach((Type runtimeType, List<dynamic> otherListeners) {
-      otherListeners.forEach((dynamic otherListener) {
+      for (dynamic otherListener in otherListeners) {
         _addListener(runtimeType, otherListener);
-      });
+      }
     });
   }
 
   void remove<T extends EventType>(
-      T eventType, void Function(T event) listener) {
-    List<dynamic> targets = listeners[eventType.runtimeType];
+      T eventType, void Function(T event)? listener) {
+    List<dynamic>? targets = listeners[eventType.runtimeType];
     if (targets == null) {
       return;
     }
@@ -96,20 +97,20 @@ class EventManager {
   /// send the supplied event to all of the listeners that are subscribed to that EventType
   void emit<T extends EventType>(T event) {
     event.sanityCheck();
-    List<dynamic> targets = listeners[event.runtimeType];
+    List<dynamic>? targets = listeners[event.runtimeType];
 
     if (targets != null) {
       // avoid concurrent modification
       List<dynamic> copy = List<dynamic>.from(targets);
 
-      copy.forEach((dynamic target) {
+      for (dynamic target in copy) {
         try {
           //   logger.warn("invoking $event on $target");
           target(event);
         } catch (e, s) {
           logger.error(e.toString(), null, s);
         }
-      });
+      }
     }
   }
 }
